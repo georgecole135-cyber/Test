@@ -1,0 +1,674 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GCSE Paper 2 & 3 Revision Scout</title>
+    <!-- MathJax Configuration for better rendering -->
+    <script>
+        window.MathJax = {
+            tex: {
+                inlineMath: [['$', '$'], ['\\(', '\\)']],
+                displayMath: [['$$', '$$'], ['\\[', '\\]']],
+                processEscapes: true
+            },
+            options: {
+                enableMenu: false
+            }
+        };
+    </script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        .star-rating { color: #fbbf24; }
+        .worked-solution { display: none; }
+        .worked-solution.show { display: block; }
+        .hidden-section { display: none; }
+        /* Prevent layout shift when math loads */
+        mjx-container { overflow-x: auto; overflow-y: hidden; max-width: 100%; }
+    </style>
+</head>
+<body class="bg-slate-50 text-slate-900 font-sans min-h-screen">
+
+    <div id="app" class="max-w-3xl mx-auto px-4 py-8">
+        <!-- HEADER -->
+        <header class="text-center mb-10">
+            <h1 class="text-3xl font-bold text-indigo-700 mb-2">Test Some Key Topics</h1>
+            <p class="text-slate-600">Select a set of Questions to Begin.</p>
+        </header>
+
+        <!-- MAIN MENU -->
+        <div id="main-menu" class="space-y-4">
+    <div class="bg-white p-6 rounded-xl shadow-sm border border-slate-200">
+        <h2 class="text-xl font-semibold mb-4 text-center">Select a Topic Set</h2>
+        <div class="grid grid-cols-1 gap-3">
+            <button onclick="startSession(1)" class="w-full py-4 px-6 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg font-bold text-left transition">
+                Set 1: FDP Conversions, Ordering Numbers, Factors and Multiples, Rounding
+            </button>
+            
+            <button onclick="startSession(2)" class="w-full py-4 px-6 bg-indigo-600 hover:bg-indigo-600 text-white rounded-lg font-bold text-left transition">
+                Set 2: Standard Form, Simplifying, Solving Linear Equations, Time Calculations
+            </button>
+            
+            <button onclick="startSession(3)" class="w-full py-4 px-6 bg-indigo-600 hover:bg-indigo-500 text-white rounded-lg font-bold text-left transition">
+                Set 3: Ratios, Triangles, Averages
+            </button>
+        </div>
+    </div>
+</div>
+
+        <!-- QUESTION AREA -->
+        <div id="question-container" class="hidden-section">
+            <div class="mb-4 flex justify-between items-center">
+                <button onclick="showMenu()" class="text-indigo-600 hover:underline font-medium">&larr; Back to Menu</button>
+                <span id="progress-text" class="text-sm font-semibold text-slate-500 uppercase tracking-wider"></span>
+            </div>
+            
+            <div class="bg-white p-8 rounded-2xl shadow-md border border-slate-100 min-h-[300px] flex flex-col">
+                <div class="mb-2">
+                    <span id="q-topic" class="text-xs font-bold bg-indigo-100 text-indigo-700 px-2 py-1 rounded uppercase tracking-widest"></span>
+                </div>
+                
+                <div id="q-text" class="text-xl mb-8 leading-relaxed"></div>
+
+<div id="q-svg-container" class="hidden mb-8 flex justify-center text-slate-700">
+    </div>
+
+<div id="q-image-container" class="hidden mb-8 flex justify-center">
+    <img id="q-image" src="" alt="Math Diagram" class="max-h-64 object-contain rounded-lg border border-slate-200 shadow-sm p-2">
+</div>
+
+                <!-- Solution Section -->
+                <div id="solution-box" class="mt-auto">
+                    <button id="reveal-btn" onclick="toggleSolution()" class="w-full py-2 border-2 border-dashed border-slate-300 text-slate-500 rounded-lg hover:bg-slate-50 transition mb-4">
+                        Click to reveal worked solution
+                    </button>
+                    
+                    <div id="worked-solution" class="worked-solution bg-green-50 p-6 rounded-lg border border-green-100 mb-6">
+                        <h4 class="font-bold text-green-800 mb-2">Worked Solution:</h4>
+                        <div id="solution-content" class="text-slate-700"></div>
+                    </div>
+
+                    <!-- Assessment Buttons (Hidden until solution revealed) -->
+                    <div id="assessment-btns" class="hidden grid grid-cols-2 gap-4">
+                        <button onclick="recordResult(false)" class="bg-rose-100 hover:bg-rose-200 text-rose-700 font-bold py-3 rounded-xl transition border border-rose-200">
+                            I got it wrong
+                        </button>
+                        <button onclick="recordResult(true)" class="bg-emerald-500 hover:bg-emerald-600 text-white font-bold py-3 rounded-xl transition shadow-lg shadow-emerald-200">
+                            I got it right!
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- SUMMARY AREA -->
+        <div id="summary-container" class="hidden-section">
+            <div class="bg-white p-8 rounded-2xl shadow-md border border-slate-100">
+                <h2 class="text-2xl font-bold mb-2 text-center text-indigo-700">Revision Roadmap</h2>
+                <p class="text-slate-500 text-center mb-8 text-sm">Based on your self-assessment, focus on these areas.</p>
+                
+                <div id="revision-list" class="space-y-4">
+                    <!-- Targeted revision topics will appear here -->
+                </div>
+
+                <button onclick="location.reload()" class="mt-10 w-full py-3 bg-slate-800 text-white font-bold rounded-xl hover:bg-slate-900 transition">
+                    Restart Topic Scout
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const questions = [
+  {
+    id: 1,
+    stars: 1,
+    topic: "FDP Conversions",
+    text: "(a) Use your calculator to convert $\\frac{7}{16}$ to a decimal.<br><br>(b) Convert $0.85$ into a fraction in its simplest form.",
+    solution: "(a) $7 \\div 16 = 0.4375$<br>(b) $0.85 = \\frac{85}{100} = \\frac{17}{20}$<br><strong>Answer: (a) $0.4375$, (b) $\\frac{17}{20}$</strong>"
+  },
+  {
+    id: 2,
+    stars: 1,
+    topic: "FDP Conversions",
+    text: "(a) Write $6.5\\%$ as a decimal.<br><br>(b) Write $0.09$ as a percentage.",
+    solution: "(a) $6.5 \\div 100 = 0.065$<br>(b) $0.09 \\times 100 = 9\\%$<br><strong>Answer: (a) $0.065$, (b) $9\\%$</strong>"
+  },
+  {
+    id: 3,
+    stars: 1,
+    topic: "FDP Conversions",
+    text: "(a) A basketball player scores $37$ out of $45$ free throws. What percentage of free throws did they score? Give your answer to $1$ decimal place.<br><br>(b) Write $44\\%$ as a fraction in its simplest form.",
+    solution: "(a) $37 \\div 45 \\times 100 = 82.222...\\%$<br>(b) $44\\% = \\frac{44}{100} = \\frac{11}{25}$<br><strong>Answer: (a) $82.2\\%$, (b) $\\frac{11}{25}$</strong>"
+  },
+  {
+    id: 4,
+    stars: 1,
+    topic: "FDP Conversions",
+    text: "Write the following in order of size, starting with the smallest: $\\frac{3}{8} \\quad 0.38 \\quad 35\\% \\quad \\frac{2}{5}$",
+    solution: "Convert all to decimals:<br>$\\frac{3}{8} = 0.375$<br>$0.38 = 0.38$<br>$35\\% = 0.35$<br>$\\frac{2}{5} = 0.4$<br>Order of decimals: $0.35, 0.375, 0.38, 0.4$<br><strong>Answer: $35\\%, \\frac{3}{8}, 0.38, \\frac{2}{5}$</strong>"
+  },
+  {
+    id: 5,
+    stars: 1,
+    topic: "Order Numbers (Integers and Decimals)",
+    text: "Write down the value of the digit $7$ in the number $25.073$",
+    solution: "The digit $7$ is in the hundredths column.<br><strong>Answer: $7$ hundredths (or $\\frac{7}{100}$ or $0.07$)</strong>"
+  },
+  {
+    id: 6,
+    stars: 1,
+    topic: "Order Numbers (Integers and Decimals)",
+    text: "Here are the midnight temperatures for five cities: $-4^\\circ\\text{C}, 3^\\circ\\text{C}, -7^\\circ\\text{C}, 0^\\circ\\text{C}, -1^\\circ\\text{C}$. Write these temperatures in order, starting with the coldest.",
+    solution: "The coldest temperature is the lowest negative number.<br><strong>Answer: $-7^\\circ\\text{C}, -4^\\circ\\text{C}, -1^\\circ\\text{C}, 0^\\circ\\text{C}, 3^\\circ\\text{C}$</strong>"
+  },
+  {
+    id: 7,
+    stars: 1,
+    topic: "Order Numbers (Integers and Decimals)",
+    text: "Write these numbers in order of size, starting with the smallest: $4.205 \\quad 4.25 \\quad 4.025 \\quad 4.2 \\quad 4.255$",
+    solution: "Add placeholder zeros to make them all $3$ decimal places:<br>$4.205, 4.250, 4.025, 4.200, 4.255$<br>Now order them based on size.<br><strong>Answer: $4.025, 4.2, 4.205, 4.25, 4.255$</strong>"
+  },
+  {
+    id: 8,
+    stars: 1,
+    topic: "Order Numbers (Integers and Decimals)",
+    text: "Insert the correct inequality symbol ($<$ or $>$) to make these statements true:<br><br>(a) $-6 \\ \\dots \\ -3$<br><br>(b) $0.4 \\ \\dots \\ 0.385$",
+    solution: "(a) $-6$ is further left on the number line than $-3$, so it is smaller.<br>(b) $0.4$ is equivalent to $0.400$, which is larger than $0.385$.<br><strong>Answer: (a) $-6 < -3$ (b) $0.4 > 0.385$</strong>"
+  },
+  {
+    id: 9,
+    stars: 1,
+    topic: "Factors and Multiples",
+    text: "(a) List all the factors of $42$.<br><br>(b) Write down the first four multiples of $17$.",
+    solution: "(a) Factor pairs of $42$ are $1 \\times 42$, $2 \\times 21$, $3 \\times 14$, $6 \\times 7$.<br>(b) $1 \\times 17 = 17$, $2 \\times 17 = 34$, $3 \\times 17 = 51$, $4 \\times 17 = 68$.<br><strong>Answer: (a) $1, 2, 3, 6, 7, 14, 21, 42$ (b) $17, 34, 51, 68$</strong>"
+  },
+  {
+    id: 10,
+    stars: 1,
+    topic: "Factors and Multiples",
+    text: "From this list of numbers, write down all the prime numbers: $9 \\quad 11 \\quad 21 \\quad 27 \\quad 31 \\quad 39$",
+    solution: "Prime numbers only have two factors: $1$ and themselves.<br>$9$ is divisible by $3$. $21$ is divisible by $3$ and $7$. $27$ is divisible by $3$ and $9$. $39$ is divisible by $3$ and $13$.<br><strong>Answer: $11$ and $31$</strong>"
+  },
+  {
+    id: 11,
+    stars: 1,
+    topic: "Factors and Multiples",
+    text: "Find the Highest Common Factor (HCF) of $48$ and $64$.",
+    solution: "Factors of $48$: $1, 2, 3, 4, 6, 8, 12, 16, 24, 48$<br>Factors of $64$: $1, 2, 4, 8, 16, 32, 64$<br>The highest number in both lists is $16$.<br><strong>Answer: $16$</strong>"
+  },
+  {
+    id: 12,
+    stars: 1,
+    topic: "Factors and Multiples",
+    text: "Lighthouse A flashes every $15$ seconds. Lighthouse B flashes every $24$ seconds. If they both flash at the exact same time, how many seconds will pass before they next flash together again?",
+    solution: "We need the Lowest Common Multiple (LCM) of $15$ and $24$.<br>Multiples of $15$: $15, 30, 45, 60, 75, 90, 105, 120$<br>Multiples of $24$: $24, 48, 72, 96, 120$<br><strong>Answer: $120$ seconds</strong>"
+  },
+  {
+    id: 13,
+    stars: 1,
+    topic: "Factors and Multiples",
+    text: "Express $140$ as a product of its prime factors. Give your answer in index form.",
+    solution: "$140 = 10 \\times 14$<br>$10 = 2 \\times 5$<br>$14 = 2 \\times 7$<br>Prime factors: $2, 2, 5, 7$.<br><strong>Answer: $2^2 \\times 5 \\times 7$</strong>"
+  },
+  {
+    id: 14,
+    stars: 1,
+    topic: "Rounding",
+    text: "(a) Round $8456$ to the nearest $100$.<br><br>(b) Round $19.6$ to the nearest whole number.",
+    solution: "(a) The tens digit is $5$, so round up the hundreds digit: $8500$.<br>(b) The tenths digit is $6$, so round up the units digit: $20$.<br><strong>Answer: (a) $8500$ (b) $20$</strong>"
+  },
+  {
+    id: 15,
+    stars: 1,
+    topic: "Rounding",
+    text: "Use your calculator to find the value of $\\frac{18}{7}$. Give your answer correct to $2$ decimal places.",
+    solution: "$18 \\div 7 = 2.571428...$<br>The third decimal place is $1$, so we round down (keep the second decimal place as it is).<br><strong>Answer: $2.57$</strong>"
+  },
+  {
+    id: 16,
+    stars: 1,
+    topic: "Rounding",
+    text: "Round $0.05482$ to $2$ significant figures.",
+    solution: "The first significant figure is $5$. The second is $4$.<br>The next digit is $8$, so we round the $4$ up to a $5$.<br><strong>Answer: $0.055$</strong>"
+  },
+  {
+    id: 17,
+    stars: 1,
+    topic: "Rounding",
+    text: "Work out an estimate for the value of $\\frac{5.12 \\times 18.9}{0.48}$ by rounding each number to $1$ significant figure first.",
+    solution: "$5.12 \\rightarrow 5$<br>$18.9 \\rightarrow 20$<br>$0.48 \\rightarrow 0.5$<br>Estimate calculation: $\\frac{5 \\times 20}{0.5} = \\frac{100}{0.5}$<br><strong>Answer: $200$</strong>"
+  },
+  {
+    id: 18,
+    stars: 2,
+    topic: "Standard Form",
+    text: "(a) Write $8,400,000$ in standard form.<br><br>(b) Write $0.00037$ in standard form.",
+    solution: "(a) Move the decimal point $6$ places to the left: $8.4 \\times 10^6$<br>(b) Move the decimal point $4$ places to the right: $3.7 \\times 10^{-4}$<br><strong>Answer: (a) $8.4 \\times 10^6$, (b) $3.7 \\times 10^{-4}$</strong>"
+  },
+  {
+    id: 19,
+    stars: 2,
+    topic: "Standard Form",
+    text: "(a) Write $5.2 \\times 10^5$ as an ordinary number.<br><br>(b) Write $8.1 \\times 10^{-4}$ as an ordinary number.",
+    solution: "(a) Move the decimal point $5$ places to the right: $520,000$<br>(b) Move the decimal point $4$ places to the left: $0.00081$<br><strong>Answer: (a) $520,000$, (b) $0.00081$</strong>"
+  },
+  {
+    id: 20,
+    stars: 2,
+    topic: "Standard Form",
+    text: "Use your calculator to work out the value of $(3.6 \\times 10^4) \\div (1.2 \\times 10^{-2})$. Give your answer in standard form.",
+    solution: "Divide the numbers: $3.6 \\div 1.2 = 3$<br>Divide the powers of $10$: $10^4 \\div 10^{-2} = 10^{4 - (-2)} = 10^6$<br>Combine: $3 \\times 10^6$<br><strong>Answer: $3 \\times 10^6$</strong>"
+  },
+  {
+    id: 21,
+    stars: 2,
+    topic: "Simplify (Like Terms + Multiplication and Divisions)",
+    text: "Simplify fully: $6x + 2y - 3x + 5y$",
+    solution: "Collect the $x$ terms: $6x - 3x = 3x$<br>Collect the $y$ terms: $2y + 5y = 7y$<br>Combine the simplified terms.<br><strong>Answer: $3x + 7y$</strong>"
+  },
+  {
+    id: 22,
+    stars: 2,
+    topic: "Simplify (Like Terms + Multiplication and Divisions)",
+    text: "Simplify fully: $5m \\times 4n$",
+    solution: "Multiply the numbers: $5 \\times 4 = 20$<br>Multiply the letters: $m \\times n = mn$<br><strong>Answer: $20mn$</strong>"
+  },
+  {
+    id: 23,
+    stars: 2,
+    topic: "Simplify (Like Terms + Multiplication and Divisions)",
+    text: "Simplify fully: $\\frac{24a^2}{8a$",
+    solution: "Divide the numbers: $24 \\div 8 = 3$<br>Divide the letters: $a^2 \\div a = a$<br><strong>Answer: $3a$</strong>"
+  },
+  {
+    id: 24,
+    stars: 2,
+    topic: "Simplify (Like Terms + Multiplication and Divisions)",
+    text: "(a) Simplify: $p^5 \\times p^3$<br><br>(b) Simplify: $\\frac{q^8}{q^2}$",
+    solution: "(a) Add the powers when multiplying: $p^{5+3} = p^8$<br>(b) Subtract the powers when dividing: $q^{8-2} = q^6$<br><strong>Answer: (a) $p^8$, (b) $q^6$</strong>"
+  },
+  {
+    id: 25,
+    stars: 2,
+    topic: "Solve Linear Equations",
+    text: "Solve: $x + 9 = 24$",
+    solution: "Subtract $9$ from both sides.<br>$x = 24 - 9$<br>$x = 15$<br><strong>Answer: $x = 15$</strong>"
+  },
+  {
+    id: 26,
+    stars: 2,
+    topic: "Solve Linear Equations",
+    text: "Solve: $4y - 7 = 21$",
+    solution: "Add $7$ to both sides: $4y = 28$<br>Divide both sides by $4$: $y = 28 \\div 4$<br><strong>Answer: $y = 7$</strong>"
+  },
+  {
+    id: 27,
+    stars: 2,
+    topic: "Solve Linear Equations",
+    text: "Solve: $7w + 3 = 4w + 18$",
+    solution: "Subtract $4w$ from both sides: $3w + 3 = 18$<br>Subtract $3$ from both sides: $3w = 15$<br>Divide both sides by $3$: $w = 15 \\div 3$<br><strong>Answer: $w = 5$</strong>"
+  },
+  {
+    id: 28,
+    stars: 2,
+    topic: "Solve Linear Equations",
+    text: "Solve: $3(2x + 5) = 33$",
+    solution: "Divide both sides by $3$: $2x + 5 = 11$<br>Subtract $5$ from both sides: $2x = 6$<br>Divide both sides by $2$: $x = 6 \\div 2$<br><strong>Answer: $x = 3$</strong>"
+  },
+  {
+    id: 29,
+    stars: 2,
+    topic: "Solve Linear Equations",
+    text: "Solve: $\\frac{x}{4} - 2 = 6$",
+    solution: "Add $2$ to both sides: $\\frac{x}{4} = 8$<br>Multiply both sides by $4$: $x = 8 \\times 4$<br><strong>Answer: $x = 32$</strong>"
+  },
+  {
+    id: 30,
+    stars: 2,
+    topic: "Time Calculations",
+    text: "(a) Write $3:45\\text{ PM}$ using the $24$-hour clock format.<br><br>(b) Write $09:20$ using the $12$-hour clock format (using am/pm).",
+    solution: "(a) Add $12$ hours to the PM time: $3 + 12 = 15$, so $15:45$<br>(b) $09:20$ is before midday, so it is $9:20\\text{ AM}$<br><strong>Answer: (a) $15:45$, (b) $9:20\\text{ AM}$</strong>"
+  },
+  {
+    id: 31,
+    stars: 2,
+    topic: "Time Calculations",
+    text: "A train leaves London at $14:35$ and arrives in Manchester at $17:10$. How long did the journey take in hours and minutes?",
+    solution: "From $14:35$ to $16:35$ is $2$ hours.<br>From $16:35$ to $17:00$ is $25$ minutes.<br>From $17:00$ to $17:10$ is $10$ minutes.<br>Total minutes = $25 + 10 = 35$ minutes.<br><strong>Answer: $2$ hours $35$ minutes</strong>"
+  },
+  {
+    id: 32,
+    stars: 2,
+    topic: "Time Calculations",
+    text: "Here is a section of a bus timetable:<br>Stop A: $08:15 \\quad 08:45 \\quad 09:15$<br>Stop B: $08:28 \\quad 08:58 \\quad 09:28$<br>Stop C: $08:50 \\quad 09:20 \\quad 09:50$<br>If you arrive at Stop A at $08:30$, what time will the next bus get you to Stop C?",
+    solution: "The next bus to leave Stop A after $08:30$ is the $08:45$ bus.<br>Follow this column down to Stop C.<br>The arrival time is $09:20$.<br><strong>Answer: $09:20$</strong>"
+  },
+  {
+    id: 33,
+    stars: 2,
+    topic: "Time Calculations",
+    text: "A cyclist travels at a constant speed for $1$ hour and $45$ minutes. Convert this time into a decimal to use in a calculator calculation.",
+    solution: "$45$ minutes is $\\frac{45}{60}$ of an hour.<br>$\\frac{45}{60} = \\frac{3}{4} = 0.75$<br>Add the $1$ full hour: $1 + 0.75 = 1.75$<br><strong>Answer: $1.75$ hours</strong>"
+  },
+  {
+    id: 34,
+    stars: 3,
+    topic: "Share into Ratio / Application of Ratio",
+    text: "Simplify the ratio $24 : 36$ completely.",
+    solution: "Find the highest common factor of $24$ and $36$, which is $12$.<br>Divide both sides of the ratio by $12$.<br>$24 \\div 12 = 2$<br>$36 \\div 12 = 3$<br><strong>Answer: $2 : 3$</strong>"
+  },
+  {
+    id: 35,
+    stars: 3,
+    topic: "Share into Ratio / Application of Ratio",
+    text: "Write the ratio $5 : 8$ in the form $1:n$.",
+    solution: "To get $1$ on the left side of the ratio, divide both sides by $5$.<br>$5 \\div 5 = 1$<br>$8 \\div 5 = 1.6$<br><strong>Answer: $1 : 1.6$</strong>"
+  },
+  {
+    id: 36,
+    stars: 3,
+    topic: "Share into Ratio / Application of Ratio",
+    text: "Share $£350$ in the ratio $2 : 3 : 5$.",
+    solution: "Find the total number of parts: $2 + 3 + 5 = 10$ parts.<br>Find the value of one part: $£350 \\div 10 = £35$.<br>Multiply each part by $£35$:<br>$2 \\times £35 = £70$<br>$3 \\times £35 = £105$<br>$5 \\times £35 = £175$<br><strong>Answer: $£70, £105, £175$</strong>"
+  },
+  {
+    id: 37,
+    stars: 3,
+    topic: "Share into Ratio / Application of Ratio",
+    text: "Sam and Jenna share some money in the ratio $3 : 7$. Jenna receives $£63$. How much money does Sam receive?",
+    solution: "Jenna receives $7$ parts, which is equal to $£63$.<br>Find the value of $1$ part: $£63 \\div 7 = £9$.<br>Sam receives $3$ parts.<br>Calculate Sam's share: $3 \\times £9 = £27$.<br><strong>Answer: $£27$</strong>"
+  },
+  {
+    id: 38,
+    stars: 3,
+    topic: "Share into Ratio / Application of Ratio",
+    text: "Shop A sells a $400\\text{g}$ box of cereal for $£2.80$. Shop B sells a $600\\text{g}$ box of the same cereal for $£3.90$. Which shop offers the better value for money? Show your working.",
+    solution: "Find the cost per $100\\text{g}$ for each shop.<br>Shop A: $£2.80 \\div 4 = £0.70$ per $100\\text{g}$.<br>Shop B: $£3.90 \\div 6 = £0.65$ per $100\\text{g}$.<br>Compare the costs: $£0.65$ is cheaper than $£0.70$.<br><strong>Answer: Shop B</strong>"
+  },
+  {
+    id: 39,
+    stars: 3,
+    topic: "Angles in a Triangle / Properties of Triangles",
+    text: "Two angles in a triangle are $48^\\circ$ and $74^\\circ$. Work out the size of the third angle.",
+    // Standard Scalene Triangle
+    svg: `
+        <svg viewBox="0 0 200 150" class="w-full max-w-xs h-auto border border-slate-200 rounded-xl p-4 bg-white shadow-sm">
+            <polygon points="10,140 180,140 70,20" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/>
+            <text x="30" y="132" font-size="12" fill="currentColor" font-weight="bold">48°</text>
+            <text x="145" y="132" font-size="12" fill="currentColor" font-weight="bold">74°</text>
+            <text x="70" y="50" font-size="14" fill="currentColor" font-weight="bold">?</text>
+        </svg>
+    `,
+    solution: "Angles in a triangle add up to $180^\\circ$.<br>Add the two known angles together: $48^\\circ + 74^\\circ = 122^\\circ$.<br>Subtract this sum from $180^\\circ$: $180^\\circ - 122^\\circ = 58^\\circ$.<br><strong>Answer: $58^\\circ$</strong>"
+  },
+  {
+    id: 40,
+    stars: 3,
+    topic: "Angles in a Triangle / Properties of Triangles",
+    text: "A triangle has one angle of $90^\\circ$. What is the name for this type of triangle.",
+    // No diagram needed for this conceptual question
+    solution: "A triangle with a $90^\\circ$ angle is a right-angled triangle.<br>Answer: Right-angled triangle</strong>"
+  },
+  {
+    id: 41,
+    stars: 3,
+    topic: "Angles in a Triangle / Properties of Triangles",
+    text: "An isosceles triangle has a top angle of $44^\\circ$. Calculate the size of one of its base angles.",
+    // Isosceles with tick marks
+    svg: `
+        <svg viewBox="0 0 200 160" class="w-full max-w-xs h-auto border border-slate-200 rounded-xl p-4 bg-white shadow-sm">
+            <polygon points="50,140 150,140 100,20" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/>
+            <line x1="68" y1="80" x2="82" y2="80" stroke="currentColor" stroke-width="2"/>
+            <line x1="118" y1="80" x2="132" y2="80" stroke="currentColor" stroke-width="2"/>
+            <text x="92" y="50" font-size="12" fill="currentColor" font-weight="bold">44°</text>
+            <text x="65" y="132" font-size="14" fill="currentColor" font-weight="bold">?</text>
+        </svg>
+    `,
+    solution: "Angles in a triangle add up to $180^\\circ$.<br>Subtract the top angle from $180^\\circ$: $180^\\circ - 44^\\circ = 136^\\circ$.<br>The two base angles are equal, so divide the remainder by $2$: $136^\\circ \\div 2 = 68^\\circ$.<br><strong>Answer: $68^\\circ$</strong>"
+  },
+  {
+    id: 42,
+    stars: 3,
+    topic: "Angles in a Triangle / Properties of Triangles",
+    text: "In a triangle $ABC$, the straight line $AB$ is extended to a point $D$. Given that angle $ACB = 62^\\circ$ and angle $CAB = 55^\\circ$, calculate the size of the exterior angle $CBD$.",
+    // Triangle with extended line
+    svg: `
+        <svg viewBox="0 0 240 160" class="w-full max-w-sm h-auto border border-slate-200 rounded-xl p-4 bg-white shadow-sm">
+            <line x1="20" y1="140" x2="220" y2="140" stroke="currentColor" stroke-width="2"/>
+            <line x1="20" y1="140" x2="90" y2="30" stroke="currentColor" stroke-width="2"/>
+            <line x1="90" y1="30" x2="140" y2="140" stroke="currentColor" stroke-width="2"/>
+            <text x="35" y="132" font-size="12" fill="currentColor" font-weight="bold">55°</text>
+            <text x="85" y="55" font-size="12" fill="currentColor" font-weight="bold">62°</text>
+            <text x="150" y="132" font-size="14" fill="currentColor" font-weight="bold">x</text>
+            <text x="10" y="155" font-size="12" fill="currentColor">A</text>
+            <text x="135" y="155" font-size="12" fill="currentColor">B</text>
+            <text x="85" y="20" font-size="12" fill="currentColor">C</text>
+            <text x="215" y="155" font-size="12" fill="currentColor">D</text>
+        </svg>
+    `,
+    solution: "Find the interior angle $ABC$ first: $180^\\circ - (62^\\circ + 55^\\circ) = 180^\\circ - 117^\\circ = 63^\\circ$.<br>Angles on a straight line add up to $180^\\circ$.<br>Calculate exterior angle $CBD$: $180^\\circ - 63^\\circ = 117^\\circ$.<br><strong>Answer: $117^\\circ$</strong>"
+  },
+  {
+    id: 43,
+    stars: 3,
+    topic: "Averages (From Diagram or Table)",
+    text: "The table shows the number of goals scored by a team in $20$ matches.<br><br>$\\begin{array}{c|c} \\text{Goals scored} & \\text{Frequency} \\\\ \\hline 0 & 4 \\\\ 1 & 7 \\\\ 2 & 6 \\\\ 3 & 3 \\end{array}$<br><br>Work out the median number of goals scored.",
+    solution: "Total frequency is $20$. The median is located between the $10$th and $11$th values.<br>Find the cumulative frequencies:<br>Up to $0$ goals: $4$ matches.<br>Up to $1$ goal: $4 + 7 = 11$ matches.<br>Since matches $5$ through $11$ all have $1$ goal, both the $10$th and $11$th values are $1$.<br><strong>Answer: $1$ goal</strong>"
+  },
+  {
+    id: 44,
+    stars: 3,
+    topic: "Averages (From Diagram or Table)",
+    text: "The table shows the time, $t$ minutes, taken by $30$ students to complete a test.<br><br>$\\begin{array}{c|c} \\text{Time } (t \\text{ minutes}) & \\text{Frequency} \\\\ \\hline 0 < t \\le 10 & 5 \\\\ 10 < t \\le 20 & 13 \\\\ 20 < t \\le 30 & 8 \\\\ 30 < t \\le 40 & 4 \\end{array}$<br><br>Write down the modal class interval.",
+    solution: "The modal class interval is the group with the highest frequency.<br>Look down the frequency column to find the largest number, which is $13$.<br>Identify the class interval corresponding to $13$.<br><strong>Answer: $10 < t \\le 20$</strong>"
+  },
+  {
+    id: 45,
+    stars: 3,
+    topic: "Averages (From Diagram or Table)",
+    text: "The table shows the time, $t$ minutes, taken by $30$ students to complete a test.<br><br>$\\begin{array}{c|c} \\text{Time } (t \\text{ minutes}) & \\text{Frequency} \\\\ \\hline 0 < t \\le 10 & 5 \\\\ 10 < t \\le 20 & 13 \\\\ 20 < t \\le 30 & 8 \\\\ 30 < t \\le 40 & 4 \\end{array}$<br><br>Calculate an estimate for the mean time taken by the students.",
+    solution: "Find the midpoints ($x$) of each interval: $5, 15, 25, 35$.<br>Multiply each midpoint by its frequency ($f \\times x$):<br>$5 \\times 5 = 25$<br>$15 \\times 13 = 195$<br>$25 \\times 8 = 200$<br>$35 \\times 4 = 140$<br>Sum the products: $25 + 195 + 200 + 140 = 560$.<br>Divide by the total frequency ($30$): $560 \\div 30 = 18.333...$<br><strong>Answer: $18.7\\text{ minutes}$</strong>"
+  },
+  {
+    id: 46,
+    stars: 3,
+    topic: "Averages (From Diagram or Table)",
+    text: "A stem-and-leaf diagram shows the scores of $11$ students in a quiz:<br><br>$\\begin{array}{r|l} 1 & 2, 5, 8 \\\\ 2 & 1, 4, 4, 7, 9 \\\\ 3 & 0, 3, 6 \\end{array}$<br><br>Key: $1 \\mid 2$ means a score of $12$.<br><br>Work out the range of these scores.",
+    solution: "Identify the highest score from the diagram: $36$.<br>Identify the lowest score from the diagram: $12$.<br>Calculate the range by subtracting the lowest score from the highest score: $36 - 12 = 24$.<br><strong>Answer: $24$</strong>"
+  }
+];
+
+let currentSessionQuestions = [];
+        let currentIndex = 0;
+        let topicStats = {}; // Object to track total and correct answers per topic
+
+        function startSession(starRating) {
+            currentSessionQuestions = questions.filter(q => q.stars === starRating);
+            if (currentSessionQuestions.length === 0) {
+                alert("No questions added for this priority level yet!");
+                return;
+            }
+            
+            // Initialize stats for the session
+            topicStats = {};
+            currentSessionQuestions.forEach(q => {
+                if (!topicStats[q.topic]) {
+                    topicStats[q.topic] = { total: 0, correct: 0 };
+                }
+                topicStats[q.topic].total++;
+            });
+
+            currentIndex = 0;
+            
+            document.getElementById('main-menu').classList.add('hidden-section');
+            document.getElementById('question-container').classList.remove('hidden-section');
+            loadQuestion();
+        }
+
+        async function loadQuestion() {
+    const q = currentSessionQuestions[currentIndex];
+    
+    // Reset UI
+    document.getElementById('worked-solution').classList.remove('show');
+    document.getElementById('assessment-btns').classList.add('hidden');
+    document.getElementById('reveal-btn').classList.remove('hidden');
+    
+    // Populate Content
+    document.getElementById('progress-text').innerText = `Question ${currentIndex + 1} of ${currentSessionQuestions.length}`;
+    document.getElementById('q-topic').innerText = q.topic;
+    document.getElementById('q-text').innerHTML = q.text;
+    document.getElementById('solution-content').innerHTML = q.solution;
+
+    // --- NEW INLINE SVG LOGIC ---
+    const svgContainer = document.getElementById('q-svg-container');
+    
+    if (q.svg) {
+        svgContainer.innerHTML = q.svg;
+        svgContainer.classList.remove('hidden');
+    } else {
+        svgContainer.innerHTML = '';
+        svgContainer.classList.add('hidden');
+    }
+    // ----------------------------
+
+    // Trigger MathJax typeset for the new content
+    if (window.MathJax && window.MathJax.typesetPromise) {
+        await MathJax.typesetPromise();
+    }
+}
+
+        function toggleSolution() {
+            document.getElementById('worked-solution').classList.add('show');
+            document.getElementById('reveal-btn').classList.add('hidden');
+            document.getElementById('assessment-btns').classList.remove('hidden');
+            
+            // Re-render solution math if any
+            if (window.MathJax && window.MathJax.typesetPromise) {
+                MathJax.typesetPromise();
+            }
+        }
+
+        function recordResult(isCorrect) {
+            const currentTopic = currentSessionQuestions[currentIndex].topic;
+            
+            if (isCorrect) {
+                topicStats[currentTopic].correct++;
+            }
+
+            if (currentIndex < currentSessionQuestions.length - 1) {
+                currentIndex++;
+                loadQuestion();
+            } else {
+                showSummary();
+            }
+        }
+
+        function showSummary() {
+            document.getElementById('question-container').classList.add('hidden-section');
+            document.getElementById('summary-container').classList.remove('hidden-section');
+            
+            const listEl = document.getElementById('revision-list');
+            listEl.innerHTML = '';
+
+            let perfectScore = true;
+
+            for (const [topic, stats] of Object.entries(topicStats)) {
+                // If they didn't get 100% on this topic, add it to the revision list
+                if (stats.correct < stats.total) {
+                    perfectScore = false;
+                    
+                    const percentCorrect = Math.round((stats.correct / stats.total) * 100);
+                    
+                    // Determine priority color based on percentage
+                    let barColor = 'bg-red-500'; // High priority (0-33%)
+                    let priorityText = 'High Priority Revision';
+                    let textClass = 'text-red-600';
+                    
+                    if (percentCorrect > 66) {
+                        barColor = 'bg-emerald-400'; // Low priority (67-99%)
+                        priorityText = 'Review Recommended';
+                        textClass = 'text-emerald-600';
+                    } else if (percentCorrect > 33) {
+                        barColor = 'bg-amber-400'; // Medium priority (34-66%)
+                        priorityText = 'Medium Priority Revision';
+                        textClass = 'text-amber-600';
+                    }
+
+                    // Ensure minimum width of 2% so "0%" red bars are still slightly visible
+                    const displayWidth = percentCorrect === 0 ? 2 : percentCorrect;
+
+                    const div = document.createElement('div');
+                    div.className = "flex flex-col p-5 bg-white border border-slate-200 rounded-xl shadow-sm";
+                    div.innerHTML = `
+                        <div class="flex justify-between items-center mb-3">
+                            <div>
+                                <p class="font-bold text-slate-800 text-lg">${topic}</p>
+                                <p class="text-xs text-slate-500 mt-1">Search for this topic on CorbettMaths or Sparx</p>
+                            </div>
+                            <div class="text-right">
+                                <span class="text-sm font-bold text-slate-700">${stats.correct} / ${stats.total} correct</span>
+                            </div>
+                        </div>
+                        
+                        <div class="w-full bg-slate-100 rounded-full h-3 mb-2 overflow-hidden border border-slate-200">
+                            <div class="${barColor} h-full rounded-full transition-all duration-1000" style="width: ${displayWidth}%"></div>
+                        </div>
+                        
+                        <div class="flex justify-between items-center">
+                            <span class="text-xs font-bold ${textClass} uppercase tracking-wider">${priorityText}</span>
+                            <span class="text-xs font-semibold text-slate-500">${percentCorrect}% Mastery</span>
+                        </div>
+                    `;
+                    listEl.appendChild(div);
+                }
+            }
+
+            if (perfectScore) {
+                listEl.innerHTML = `
+                    <div class="bg-emerald-50 p-6 rounded-xl border border-emerald-100 text-center shadow-sm">
+                        <div class="text-emerald-500 mb-2 flex justify-center">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                            </svg>
+                        </div>
+                        <p class="text-emerald-800 font-bold text-lg">Great work!</p>
+                        <p class="text-emerald-600 text-sm mt-1">You nailed all the topics in this set.</p>
+                    </div>
+                `;
+            }
+        }
+
+        function showMenu() {
+            document.getElementById('question-container').classList.add('hidden-section');
+            document.getElementById('summary-container').classList.add('hidden-section');
+            document.getElementById('main-menu').classList.remove('hidden-section');
+        }
+
+        // Listen for keyboard shortcuts (Spacebar to reveal, 1 and 2 to self-assess)
+        document.addEventListener('keydown', function(event) {
+            const questionContainer = document.getElementById('question-container');
+            
+            if (!questionContainer.classList.contains('hidden-section')) {
+                const revealBtn = document.getElementById('reveal-btn');
+                const assessmentBtns = document.getElementById('assessment-btns');
+                
+                if (event.code === 'Space' && !revealBtn.classList.contains('hidden')) {
+                    event.preventDefault();
+                    toggleSolution();
+                    return;
+                }
+                
+                if (!assessmentBtns.classList.contains('hidden')) {
+                    if (event.key === '1') {
+                        recordResult(false);
+                    } else if (event.key === '2') {
+                        recordResult(true);
+                    }
+                }
+            }
+        });
+    </script>
+</body>
+</html>
